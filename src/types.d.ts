@@ -1,12 +1,10 @@
-interface Tasks {
-  id: string;
-  title: string;
-  completed: boolean;
-}
+// Task type is now defined in backend.ts
+// This file contains legacy types that may be removed
 
 interface Window {
-  Main: {
-    LoadTasks: () => Promise<Tasks[] | null>;
-    SaveTasks: (tasks: Tasks[]) => Promise<void>;
+  // Legacy - no longer used
+  Main?: {
+    LoadTasks: () => Promise<unknown[] | null>;
+    SaveTasks: (tasks: unknown[]) => Promise<void>;
   };
 }
