@@ -16,24 +16,19 @@ function Tasks() {
   };
 
   return (
-    <div className="rounded-lg pt-6 h-full w-full flex flex-col space-y-2">
-      <div className="pb-2 px-6 z-10 flex sticky top-0 flex-row space-x-5 items-center select-none bg-opacity-90">
-        <h1 className="text-3xl font-bold">Tasks</h1>
-        <hr className="h-full w-px bg-gray-300" />
-        <div className="flex flex-row w-full items-center justify-between space-x-2">
-          <div className="flex items-center space-x-2">
-            <h1 className="text-xl font-bold">{numTasks}</h1>
-            <p>
-              Unfinished Task
-              {numTasks ? "s" : ""}
-              {numTasks == 0 ? ", Woohoo 🥳!" : ""}
-            </p>
-          </div>
-          <button className="undraggable bg-gray-600 backdrop-blur-sm bg-opacity-10 px-2 py-1 rounded-md" >
-            <BsThreeDots className="fill-gray-600" size={16} />
-          </button>
-        </div>
-      </div>
+    <div className="rounded-lg pt-6 h-full w-full flex flex-col space-y-2 text-black dark:text-neutral-200">
+      {/* Improved Header Section */}
+    <div className="pb-2 px-6 z-10 sticky top-0 flex items-baseline gap-3 select-none bg-opacity-90">
+      <h1 className="text-3xl font-bold text-black dark:text-white">Tasks</h1>
+      
+      <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
+        <span className="font-bold text-lg mr-1">
+          {numTasks}
+        </span>
+        Unfinished Task{numTasks !== 1 ? "s" : ""}
+        {numTasks === 0 && ", Woohoo 🥳!"}
+      </p>
+    </div>
 
       <TaskList
         animation={true}

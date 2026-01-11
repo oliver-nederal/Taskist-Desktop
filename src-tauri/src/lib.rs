@@ -231,7 +231,7 @@ async fn open_date_picker_popup(
     .always_on_top(true)
     .skip_taskbar(true)
     .focused(true)
-    .transparent(true)
+    //.transparent(true)
     .shadow(true)
     .build()
     .map_err(|e| format!("Failed to create popup: {}", e))?;

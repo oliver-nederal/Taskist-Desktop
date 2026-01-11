@@ -115,7 +115,7 @@ function App() {
 
   return (
     <div className="font-taskly min-h-screen flex flex-row antialiased mac"> 
-      { osName === 'macos' && <div data-tauri-drag-region className="fixed w-screen h-8 z-50 bg-red-500" />}
+      { osName === 'macos' && <div data-tauri-drag-region className="fixed w-screen h-8 z-50 hover:bg-red-500" />}
       { onboarding && <Onboarding /> }
 
       <SideBar onTabSwitch={handleTabSwitch} currentTab={tab} onOpenSettings={handleOpenSettings} onOpenCreateTask={handleOpenCreateTask} />

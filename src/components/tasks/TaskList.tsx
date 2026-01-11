@@ -308,7 +308,7 @@ export default function TaskList({
       </ul>
 
       {input && (
-        <div className="absolute bottom-0 left-1/2 translate-x-[-50%] p-2 w-full h-[45px]">
+        <div className="hidden absolute bottom-0 left-1/2 translate-x-[-50%] p-2 w-full h-[45px]">
           <input
             className={`w-full h-full px-2 rounded-lg outline-none ${
               invalidInput ? "bg-red-50" : "bg-gray-200"

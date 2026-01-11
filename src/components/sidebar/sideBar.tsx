@@ -26,7 +26,7 @@ interface sideBarProps {
 }
 
 const HorizontalDivider = ()=> {
-  return <div className="w-full h-px my-2 bg-gray-200 dark:bg-neutral-600" />
+  return <div className="w-full h-px my-2 bg-gray-200 dark:bg-neutral-700" />
 }
 
 function SideBar({ onTabSwitch, currentTab, onOpenSettings, onOpenCreateTask }: sideBarProps) {
@@ -37,7 +37,7 @@ function SideBar({ onTabSwitch, currentTab, onOpenSettings, onOpenCreateTask }: 
 
 
   return (
-    <aside className={`sticky top-0 bg-[#f3f3f3] dark:bg-[#202020] h-dvh [html.os-macos_&]:pt-6 pt-2 px-3 self-start col-span-1 space-y-2 transition-[width] duration-300 ease-in-out` + (isOpen ? " w-sm" : " w-14")}>
+    <aside className={`sticky top-0 bg-[#f3f3f3] dark:bg-[#202020] h-dvh [html.os-macos_&]:pt-8 pt-2 px-3 self-start col-span-1 space-y-2 transition-[width] duration-300 ease-in-out` + (isOpen ? " w-sm" : " w-14 [html.os-macos_&]:w-21")}>
       <header className="flex-row w-full flex justify-between items-center">
         {/** USER INFO **/}
         <button
@@ -49,7 +49,7 @@ function SideBar({ onTabSwitch, currentTab, onOpenSettings, onOpenCreateTask }: 
             src="https://picsum.photos/50/50"
           />
           <div className={isOpen ? `flex flex-col my-1 ml-2 items-start` : `hidden`}>
-            <p className="text-sm h-fit font-bold">Oliver</p>
+            <p className="text-sm h-fit font-bold dark:text-gray-300">Oliver</p>
             <p className="text-xs text-gray-500 font-medium">
               Premium+
             </p>
@@ -60,7 +60,7 @@ function SideBar({ onTabSwitch, currentTab, onOpenSettings, onOpenCreateTask }: 
           className={`${ isOpen ? "flex" : "hidden" } group cursor-pointer aspect-square w-8 h-8 rounded-md flex items-center justify-center hover:bg-gray-200/40 transition-colors`}
         >
           <IoIosNotificationsOutline
-            className="text-gray-600 transition-transform duration-200"
+            className="text-gray-600 dark:text-gray-400 transition-transform duration-200"
             size={20}
           />
         </button>
@@ -70,7 +70,7 @@ function SideBar({ onTabSwitch, currentTab, onOpenSettings, onOpenCreateTask }: 
           onClick={() => setIsOpen(!isOpen)}
         >
           <PiSidebarSimpleLight
-            className={`text-gray-600 transition-transform duration-200`}
+            className={`text-gray-600 dark:text-gray-400 transition-transform duration-200`}
             size={20}
           />
         </button>
@@ -110,7 +110,7 @@ function SideBar({ onTabSwitch, currentTab, onOpenSettings, onOpenCreateTask }: 
           <SidebarGridButton
             icon={<IoAlert size={iconSize} />}
             label="Overdue"
-            color="green"
+            color="yellow"
             tabKey={Tabs.completed}
             currentTab={currentTab}
             isMenuOpen={isOpen}
@@ -119,7 +119,7 @@ function SideBar({ onTabSwitch, currentTab, onOpenSettings, onOpenCreateTask }: 
           <SidebarGridButton
             icon={<IoCheckmarkDone size={iconSize} />}
             label="Completed"
-            color="yellow"
+            color="green"
             tabKey={Tabs.completed}
             currentTab={currentTab}
             isMenuOpen={isOpen}
@@ -209,11 +209,9 @@ function SideBar({ onTabSwitch, currentTab, onOpenSettings, onOpenCreateTask }: 
         </div> 
         }
 
-        <HorizontalDivider />
-
         <div className="absolute bottom-0 left-0 w-full flex flex-col px-3 pb-2 space-y-1">
           <SyncIndicatorCompact isExpanded={isOpen} />
-          <SidebarButton
+          {/* <SidebarButton
             icon={<IoSettingsSharp size={iconSize} />}
             label="Settings"
             color="blue"
@@ -221,7 +219,7 @@ function SideBar({ onTabSwitch, currentTab, onOpenSettings, onOpenCreateTask }: 
             currentTab=""
             isMenuOpen={isOpen}
             onClick={onOpenSettings}
-          />
+          /> */}
         </div>
         
       </ul>

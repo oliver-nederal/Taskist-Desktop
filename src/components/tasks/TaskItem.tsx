@@ -185,7 +185,7 @@ function TaskItem({
   const currentProject = PROJECTS.find(p => p.id === editProject) || PROJECTS[0];
   
   const titleClasses = `
-    relative text-gray-800 dark:text-neutral-300 select-none line-clamp-1 text-sm
+    relative text-gray-800 dark:text-neutral-300 select-none text-sm
     ${!animation && task.completed ? "line-through text-gray-500" : ""}
   `;
 
