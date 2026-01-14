@@ -84,7 +84,7 @@ function CreateTaskModalContent() {
             <DatePicker
               value={dueDate}
               onChange={setDueDate}
-              minDate={today}
+              {...({ minDate: today } as any)}
             />
             
             <button

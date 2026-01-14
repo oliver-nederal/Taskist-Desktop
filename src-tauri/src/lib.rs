@@ -268,6 +268,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             let app_dir = app.path().app_data_dir().expect("Failed to get app directory");
             std::fs::create_dir_all(&app_dir).expect("Failed to create app directory");
@@ -287,6 +288,14 @@ pub fn run() {
             };
             
             app.manage(Arc::new(RwLock::new(state)));
+
+            // Check for updates on startup (optional - comment out if you want manual checks only)
+            // UNCOMMENT THE LINES BELOW FOR AUTOMATIC UPDATE CHECKS ON STARTUP:
+            let app_handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+                let _ = app_handle.emit("check-for-updates", ());
+            });
             
             Ok(())
         })

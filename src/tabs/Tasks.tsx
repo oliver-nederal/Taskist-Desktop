@@ -2,18 +2,18 @@
 import { useState } from "react";
 
 import TaskList from "../components/tasks/TaskList";
-import { BsThreeDots } from "react-icons/bs";
 
 function Tasks() {
   const [numTasks, setNumTasks] = useState<number>(0);
   // Remove the checklistKey state since we don't need it anymore
-  const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
+  const [refreshTrigger] = useState<number>(0);
 
-  // Function to handle refreshing tasks without recreating the component
+  /* Function to handle refreshing tasks without recreating the component
   const handleRefresh = () => {
     // Just increment the refreshTrigger to force a data reload
     setRefreshTrigger((prev) => prev + 1);
   };
+  */
 
   return (
     <div className="rounded-lg pt-6 h-full w-full flex flex-col space-y-2 text-black dark:text-neutral-200">

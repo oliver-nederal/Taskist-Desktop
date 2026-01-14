@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 import { SidebarButton } from "../Buttons/SidebarButton";
 import { Modal, ModalSplitLayout, ModalSidebar, ModalContent } from "../ui/Modal";
 
-import { SettingsAPI, SyncAPI, type SyncSettings, type SyncMode } from "../../backend";
-import { useTasks } from "../../context/TasksContext";
+import { SettingsAPI, SyncAPI, type SyncSettings } from "../../backend";
+//import { useTasks } from "../../context/TasksContext";
 
 import { IoSync, IoColorPalette, IoNotifications, IoCheckboxOutline, IoShieldCheckmark } from "react-icons/io5";
 
@@ -15,7 +15,7 @@ interface SettingsProps {
 }
 
 function SettingsModal({ isOpen, onClose }: SettingsProps) {
-  const { restartSync } = useTasks();
+  //const { restartSync } = useTasks();
   const [activeTab, setActiveTab] = useState<string>("Sync");
   const [syncSettings, setSyncSettings] = useState<SyncSettings>({
     syncMode: "local",

@@ -5,6 +5,9 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import "./App.css";
 
 import Onboarding from "./components/Onboarding";
+import UpdaterModal from "./components/UpdaterModal";
+// 🧪 TESTING: Uncomment the line below to add a "Test Updater UI" button for visual testing
+// import UpdaterModalDemo from "./components/UpdaterModalDemo";
 
 import SideBar from "./components/sidebar/sideBar";
 import Home from "./tabs/Home";
@@ -22,7 +25,7 @@ export enum Tabs {
 
 function App() {
   const [tab, setTab] = useState<string>(Tabs.home);
-  const [onboarding, setOnboarding] = useState<boolean>(false);
+  const [onboarding] = useState<boolean>(false);
   const [osName, setOsName] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showCreateTask, setShowCreateTask] = useState<boolean>(false);
@@ -31,7 +34,7 @@ function App() {
   useEffect(() => {
     const win = getCurrentWindow();
 
-    const applyTheme = (theme: "dark" | "light") => {
+    const applyTheme = (theme: "dark" | "light" | null) => {
       document.documentElement.classList.remove("dark");
       if (theme === "dark") {
         document.documentElement.classList.add("dark");
@@ -128,6 +131,9 @@ function App() {
       {/* Modals */}
       <CreateTaskModal isOpen={showCreateTask} onClose={() => setShowCreateTask(false)} />
       <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      <UpdaterModal />
+      {/* 🧪 TESTING: Uncomment the line below to add a "Test Updater UI" button */}
+      {/* <UpdaterModalDemo /> */}
     </div>
   );
 }

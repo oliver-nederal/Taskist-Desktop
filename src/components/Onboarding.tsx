@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import WelcomeGIF from "./Welcome.gif"; // Uncomment when you have the asset
 
 function Onboarding() {
-    const [screen, setScreen] = useState(1);
+    const [screen, setScreen] = useState<number>(1);
 
     // --- Design System & Utilities ---
 
-    const handleScreenChange = (newScreen) => {
+    const handleScreenChange = (newScreen: number): void => {
         if (newScreen >= 1 && newScreen <= 4) setScreen(newScreen);
     };
 
@@ -46,7 +46,7 @@ function Onboarding() {
 
     // --- Components for Specific Screens ---
 
-    const ProgressBar = ({ current }) => (
+    const ProgressBar = ({ current }: { current: number }) => (
         <div className="absolute bottom-8 flex gap-3">
             {[1, 2, 3, 4].map((num) => (
                 <button

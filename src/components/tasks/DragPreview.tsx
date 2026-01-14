@@ -1,5 +1,11 @@
-import React from "react";
-import type { Task } from "../../../backend";
+/* Fallback Task type for this component when backend types are unavailable */
+type Task = {
+  id?: string;
+  title: string;
+  completed: boolean;
+  description?: string;
+  dueDate?: string;
+};
 
 interface DragPreviewProps {
   task: Task;

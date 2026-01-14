@@ -1,11 +1,10 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import React, { useState } from "react";
+import { useState } from "react";
 
 import { SidebarButton } from "../Buttons/SidebarButton";
 import { SidebarGridButton } from "../Buttons/SidebarGridButton";
 import { SyncIndicatorCompact } from "../ui/SyncIndicator";
 
-import { IoSettingsSharp } from "react-icons/io5";
 import { IoIosAdd } from "react-icons/io";
 import { IoSunny, IoGrid, IoAlert, IoCheckmarkDone } from "react-icons/io5";
 import { GoHash } from "react-icons/go";
@@ -29,7 +28,7 @@ const HorizontalDivider = ()=> {
   return <div className="w-full h-px my-2 bg-gray-200 dark:bg-neutral-700" />
 }
 
-function SideBar({ onTabSwitch, currentTab, onOpenSettings, onOpenCreateTask }: sideBarProps) {
+function SideBar({ onTabSwitch, currentTab, /*onOpenSettings,*/ onOpenCreateTask }: sideBarProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [isProjectsOpen, setIsProjectsOpen] = useState(true);
   const [iconSize] = useState(18);

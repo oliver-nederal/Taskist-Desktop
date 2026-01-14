@@ -30,7 +30,7 @@ const INITIAL_DRAG_STATE: DragState = {
 };
 
 export function useDragAndDrop({
-  tasks,
+  //tasks,
   taskRefs,
   onReorder,
 }: UseDragAndDropOptions): UseDragAndDropReturn {
