@@ -110,8 +110,8 @@ jobs:
       
       - name: Download release assets
         uses: actions/github-script@v7
-        wigithub-token: ${{ secrets.GITHUB_TOKEN }}
-          th:
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
             const path = require('path');
@@ -171,8 +171,8 @@ jobs:
       
       - name: Upload latest.json to release
         uses: actions/github-script@v7
-        wigithub-token: ${{ secrets.GITHUB_TOKEN }}
-          th:
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
             const manifest = fs.readFileSync('dist/latest.json');
@@ -186,9 +186,9 @@ jobs:
             });
       
       - name: Publish release
-        usgithub-token: ${{ secrets.GITHUB_TOKEN }}
-          es: actions/github-script@v7
+        uses: actions/github-script@v7
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             await github.rest.repos.updateRelease({
               owner: context.repo.owner,
