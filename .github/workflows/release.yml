@@ -14,6 +14,9 @@ on:
 jobs:
   create-release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      releases: write
     outputs:
       release_id: ${{ steps.create-release.outputs.result }}
       version: ${{ steps.get-version.outputs.version }}
@@ -50,6 +53,9 @@ jobs:
 
   build-tauri:
     needs: create-release
+    permissions:
+      contents: write
+      releases: write
     strategy:
       fail-fast: false
       matrix:
@@ -90,6 +96,9 @@ jobs:
   generate-update-manifest:
     needs: [create-release, build-tauri]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      releases: write
     
     steps:
       - uses: actions/checkout@v4
