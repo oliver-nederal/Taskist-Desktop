@@ -3,11 +3,11 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (e.g., 0.1.0)'
+        description: "Version to release (e.g. 0.1.0)"
         required: true
         type: string
 
@@ -18,16 +18,12 @@ permissions:
 jobs:
   create-release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      releases: write
     outputs:
-      release_id: ${{ steps.create-release.outputs.result }}
       version: ${{ steps.get-version.outputs.version }}
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Get version
         id: get-version
         run: |
@@ -38,56 +34,65 @@ jobs:
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
-      
-      - name: Create release
-        id: create-release
+
+      - name: Create or reuse release
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const { data } = await github.rest.repos.createRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag_name: `v${{ steps.get-version.outputs.version }}`,
-              name: `Taskly v${{ steps.get-version.outputs.version }}`,
-              body: 'Release notes will be updated automatically',
-              draft: true,
-              prerelease: false
-            })
-            return data.id
+            const owner = context.repo.owner
+            const repo = context.repo.repo
+            const tag = `v${{ steps.get-version.outputs.version }}`
+
+            try {
+              await github.rest.repos.getReleaseByTag({ owner, repo, tag })
+              console.log(`Release already exists for ${tag}`)
+            } catch (e) {
+              if (e.status !== 404) throw e
+
+              await github.rest.repos.createRelease({
+                owner,
+                repo,
+                tag_name: tag,
+                name: `Taskly ${tag}`,
+                body: "Release notes will be updated automatically",
+                draft: true,
+                prerelease: false
+              })
+
+              console.log(`Created release for ${tag}`)
+            }
 
   build-tauri:
     needs: create-release
+    runs-on: ${{ matrix.platform }}
     permissions:
       contents: write
       releases: write
+
     strategy:
       fail-fast: false
       matrix:
         include:
-          - platform: 'windows-latest'
-            args: ''
-          - platform: 'macos-latest'
-            args: '--target universal-apple-darwin'
-    
-    runs-on: ${{ matrix.platform }}
-    
+          - platform: windows-latest
+            args: ""
+          - platform: macos-latest
+            args: "--target universal-apple-darwin"
+
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Setup Node
-        uses: actions/setup-node@v4
+
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-      
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+
+      - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
-      
-      - name: Install frontend dependencies
+
+      - name: Install frontend deps
         run: npm install
-      
+
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
@@ -95,96 +100,89 @@ jobs:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
-          releaseId: ${{ needs.create-release.outputs.release_id }}
+          tagName: v${{ needs.create-release.outputs.version }}
           args: ${{ matrix.args }}
 
   generate-update-manifest:
-    needs: [create-release, build-tauri]
+    needs: create-release
     runs-on: ubuntu-latest
     permissions:
       contents: write
       releases: write
-    
+
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Download release assets
+
+      - name: Resolve release by tag
+        id: resolve-release
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const fs = require('fs');
-            const path = require('path');
-            
-            const { data: release } = await github.rest.repos.getRelease({
+            const { data } = await github.rest.repos.getReleaseByTag({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              release_id: ${{ needs.create-release.outputs.release_id }}
-            });
-            
-            const assets = release.assets;
-            const signatures = {};
-            const urls = {};
-            
-            // Find all .sig files and their corresponding installers
-            for (const asset of assets) {
-              if (asset.name.endsWith('.sig')) {
-                const platform = asset.name.includes('x64_en-US.msi') ? 'windows-x86_64' :
-                               asset.name.includes('x64.app.tar.gz') ? 'darwin-x86_64' :
-                               asset.name.includes('aarch64.app.tar.gz') ? 'darwin-aarch64' : null;
-                
-                if (platform) {
-                  // Download signature file
-                  const sigResponse = await github.request(asset.browser_download_url);
-                  const sigContent = Buffer.from(sigResponse.data).toString('utf-8');
-                  signatures[platform] = sigContent.trim();
-                  
-                  // Find corresponding installer URL
-                  const installerName = asset.name.replace('.sig', '');
-                  const installer = assets.find(a => a.name === installerName);
-                  if (installer) {
-                    urls[platform] = installer.browser_download_url;
-                  }
-                }
-              }
-            }
-            
-            // Create latest.json
+              tag: `v${{ needs.create-release.outputs.version }}`
+            })
+            return data.id
+
+      - name: Generate latest.json
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require("fs")
+
+            const owner = context.repo.owner
+            const repo = context.repo.repo
+            const release_id = ${{ steps.resolve-release.outputs.result }}
+
+            const { data: release } =
+              await github.rest.repos.getRelease({ owner, repo, release_id })
+
             const manifest = {
-              version: '${{ needs.create-release.outputs.version }}',
-              notes: release.body || 'New release available',
+              version: "${{ needs.create-release.outputs.version }}",
+              notes: release.body || "New release available",
               pub_date: new Date().toISOString(),
               platforms: {}
-            };
-            
-            for (const [platform, signature] of Object.entries(signatures)) {
-              manifest.platforms[platform] = {
-                signature: signature,
-                url: urls[platform]
-              };
             }
-            
-            fs.mkdirSync('dist', { recursive: true });
-            fs.writeFileSync('dist/latest.json', JSON.stringify(manifest, null, 2));
-            
-            console.log('Generated latest.json:', JSON.stringify(manifest, null, 2));
-      
-      - name: Upload latest.json to release
+
+            fs.mkdirSync("dist", { recursive: true })
+            fs.writeFileSync("dist/latest.json", JSON.stringify(manifest, null, 2))
+
+      - name: Upload latest.json (replace if exists)
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const fs = require('fs');
-            const manifest = fs.readFileSync('dist/latest.json');
-            
+            const fs = require("fs")
+
+            const owner = context.repo.owner
+            const repo = context.repo.repo
+            const release_id = ${{ steps.resolve-release.outputs.result }}
+
+            const { data: assets } =
+              await github.rest.repos.listReleaseAssets({ owner, repo, release_id })
+
+            const existing = assets.find(a => a.name === "latest.json")
+            if (existing) {
+              await github.rest.repos.deleteReleaseAsset({
+                owner,
+                repo,
+                asset_id: existing.id
+              })
+            }
+
+            const data = fs.readFileSync("dist/latest.json")
+
             await github.rest.repos.uploadReleaseAsset({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              release_id: ${{ needs.create-release.outputs.release_id }},
-              name: 'latest.json',
-              data: manifest
-            });
-      
+              owner,
+              repo,
+              release_id,
+              name: "latest.json",
+              data
+            })
+
       - name: Publish release
         uses: actions/github-script@v7
         with:
@@ -193,6 +191,6 @@ jobs:
             await github.rest.repos.updateRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              release_id: ${{ needs.create-release.outputs.release_id }},
+              release_id: ${{ steps.resolve-release.outputs.result }},
               draft: false
-            });
+            })
