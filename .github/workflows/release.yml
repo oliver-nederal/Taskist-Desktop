@@ -102,8 +102,8 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
-          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
           tagName: v${{ needs.create-release.outputs.version }}
           releaseId: ${{ needs.create-release.outputs.release_id }}
@@ -135,17 +135,27 @@ jobs:
             const urls = {};
             
             // 2. Map Assets
+            console.log('Available assets:', release.assets.map(a => a.name).join(', '));
+            
             for (const asset of release.assets) {
               if (asset.name.endsWith('.sig')) {
+                console.log(`Found signature file: ${asset.name}`);
+                
                 // Determine platform
                 let platform = null;
-                if (asset.name.includes('setup.exe') || asset.name.includes('msi')) platform = 'windows-x86_64';
+                if (asset.name.includes('x64-setup.exe') || asset.name.includes('x64_en-US.msi')) {
+                  platform = 'windows-x86_64';
+                }
                 // Tauri often puts universal mac builds in darwin-x86_64 for update compatibility
-                else if (asset.name.includes('app.tar.gz')) platform = 'darwin-x86_64'; 
-                else if (asset.name.includes('AppImage.tar.gz')) platform = 'linux-x86_64';
+                else if (asset.name.includes('app.tar.gz')) {
+                  platform = 'darwin-x86_64';
+                }
+                else if (asset.name.includes('AppImage.tar.gz')) {
+                  platform = 'linux-x86_64';
+                }
 
                 if (platform) {
-                  console.log(`Processing signature for ${platform}...`);
+                  console.log(`Processing signature for ${platform}: ${asset.name}`);
                   
                   // Download signature content safely
                   const response = await github.request(asset.browser_download_url);
@@ -155,7 +165,14 @@ jobs:
                   // Find installer URL
                   const installerName = asset.name.replace('.sig', '');
                   const installer = release.assets.find(a => a.name === installerName);
-                  if (installer) urls[platform] = installer.browser_download_url;
+                  if (installer) {
+                    console.log(`Found installer for ${platform}: ${installer.name}`);
+                    urls[platform] = installer.browser_download_url;
+                  } else {
+                    console.log(`WARNING: No installer found for signature ${asset.name}`);
+                  }
+                } else {
+                  console.log(`Skipping unknown signature format: ${asset.name}`);
                 }
               }
             }
@@ -173,9 +190,15 @@ jobs:
                 manifest.platforms[plat] = { signature: sig, url: urls[plat] };
               }
             }
+            
+            console.log("Final manifest:", JSON.stringify(manifest, null, 2));
+            
+            if (Object.keys(manifest.platforms).length === 0) {
+              console.error("WARNING: No platforms found! This likely means .sig files are missing from the release.");
+              console.error("Make sure TAURI_PRIVATE_KEY and TAURI_KEY_PASSWORD secrets are configured.");
+            }
 
             // 4. Upload latest.json
-            console.log("Manifest:", JSON.stringify(manifest, null, 2));
             
             // Check for existing latest.json and delete it to avoid collision
             const existingJson = release.assets.find(a => a.name === 'latest.json');
