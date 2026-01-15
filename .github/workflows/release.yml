@@ -98,6 +98,19 @@ jobs:
       - name: Install frontend deps
         run: npm install
 
+      - name: Verify signing keys are present
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.TAURI_PRIVATE_KEY }}" ]; then
+            echo "ERROR: TAURI_PRIVATE_KEY secret is not set!"
+            exit 1
+          fi
+          if [ -z "${{ secrets.TAURI_KEY_PASSWORD }}" ]; then
+            echo "ERROR: TAURI_KEY_PASSWORD secret is not set!"
+            exit 1
+          fi
+          echo "Signing keys are configured ✓"
+
       - name: Build and Upload Assets
         uses: tauri-apps/tauri-action@v0
         env:
@@ -108,6 +121,7 @@ jobs:
           tagName: v${{ needs.create-release.outputs.version }}
           releaseId: ${{ needs.create-release.outputs.release_id }}
           args: ${{ matrix.args }}
+          includeUpdaterJson: false
 
   generate-update-manifest:
     # CRITICAL: This waits for build-tauri to finish uploading .sig files
