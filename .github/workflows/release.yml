@@ -124,6 +124,8 @@ jobs:
         with:
           tagName: v${{ needs.create-release.outputs.version }}
           releaseId: ${{ needs.create-release.outputs.release_id }}
+          uploadUpdaterSignatures: true
+          uploadUpdaterJson: true
           args: ${{ matrix.args }}
           includeUpdaterJson: false
 
